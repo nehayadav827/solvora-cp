@@ -23,12 +23,17 @@ const Home = () => {
 
     <button onClick={handleLogout}>Logout</button>
 
-    <br />
-    <br />
+    <div
+      style={{
+        display: "flex",
+        gap: "16px",
+        marginTop: "16px",
+      }}
+    >
+      <Link to="/problems">Browse Problems</Link>
 
-    <Link to="/compiler">
-      Go to Compiler
-    </Link>
+      <Link to="/compiler">Compiler</Link>
+    </div>
   </div>
 );
 };

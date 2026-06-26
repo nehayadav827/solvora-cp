@@ -121,6 +121,7 @@ export const createProblem = async (req, res) => {
  * @route   GET /api/problems?page=1&limit=20&difficulty=Easy&tag=DP&search=sum
  * @access  Public (only published) / Private admins see all
  */
+
 export const getAllProblems = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
