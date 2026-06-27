@@ -6,6 +6,7 @@ import authRoutes from "./routes/authRoutes.js";
 import compilerRoutes from "../compiler/compilerRoutes.js";
 import problemRoutes from "./routes/problemRoutes.js";
 import submissionRoutes from "./routes/submissionRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/compiler", compilerRoutes);
 app.use("/api/problems", problemRoutes); 
 app.use("/api/submissions", submissionRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 app.get("/", (req, res) => {
   res.json({
