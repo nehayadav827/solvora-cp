@@ -20,38 +20,14 @@ function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <Home />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/compiler"
-        element={
-          <ProtectedRoute>
-            <Compiler />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/problems"
-        element={
-          <ProtectedRoute>
-            <Problems />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/problems/:slug"
-        element={
-          <ProtectedRoute>
-            <ProblemDetail />
-          </ProtectedRoute>
-        }
-      />
+
+      {/* Public — no login needed */}
+      <Route path="/problems" element={<Problems />} />
+      <Route path="/problems/:slug" element={<ProblemDetail />} />
+
+      {/* Protected */}
+      <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+      <Route path="/compiler" element={<ProtectedRoute><Compiler /></ProtectedRoute>} />
     </Routes>
   );
 }

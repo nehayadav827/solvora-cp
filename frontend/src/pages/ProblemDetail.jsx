@@ -1,36 +1,45 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { getProblemBySlug } from "../api/problemApi";
 import { runCode } from "../api/compilerApi";
+import { submitCode } from "../api/submissionApi";
+import { useAuthStore } from "../store/authStore";
 import ProblemStatement from "../components/problems/ProblemStatement";
 import CodeEditor from "../components/compiler/CodeEditor";
 import LanguageSelector from "../components/compiler/LanguageSelector";
 import OutputPanel from "../components/compiler/OutputPanel";
+import VerdictCard from "../components/compiler/VerdictCard";
+import SubmissionHistory from "../components/submissions/SubmissionHistory";
 import { DEFAULT_CODE } from "../constants/languages";
+
+const TABS = ["Description", "Submissions"];
 
 const ProblemDetail = () => {
   const { slug } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
 
   const [problem, setProblem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState("Description");
 
   const [language, setLanguage] = useState("cpp");
   const [code, setCode] = useState(DEFAULT_CODE.cpp);
   const [input, setInput] = useState("");
-  const [result, setResult] = useState(null);
+
+  const [runResult, setRunResult] = useState(null);
   const [running, setRunning] = useState(false);
 
-  useEffect(() => {
-    const fetchProblem = async () => {
-      setLoading(true);
-      setError("");
+  const [submitResult, setSubmitResult] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
+  useEffect(() => {
+    const fetch = async () => {
+      setLoading(true);
       try {
         const res = await getProblemBySlug(slug);
         setProblem(res.data.problem);
-
-        // Pre-fill input with the first example's input, if available
         if (res.data.problem.examples?.length > 0) {
           setInput(res.data.problem.examples[0].input);
         }
@@ -40,25 +49,25 @@ const ProblemDetail = () => {
         setLoading(false);
       }
     };
-
-    fetchProblem();
+    fetch();
   }, [slug]);
 
   const handleLanguageChange = (newLang) => {
     setLanguage(newLang);
     setCode(DEFAULT_CODE[newLang]);
-    setResult(null);
+    setRunResult(null);
+    setSubmitResult(null);
   };
 
   const handleRun = async () => {
     setRunning(true);
-    setResult(null);
-
+    setRunResult(null);
+    setSubmitResult(null);
     try {
       const res = await runCode({ language, code, input });
-      setResult(res.data);
+      setRunResult(res.data);
     } catch (err) {
-      setResult({
+      setRunResult({
         success: false,
         verdict: "Error",
         error: err.response?.data?.message || "Something went wrong",
@@ -68,16 +77,41 @@ const ProblemDetail = () => {
     }
   };
 
-  // ── Submit will be wired to the submission system in the next step ──
-  const handleSubmit = () => {
-    alert("Submission system coming next — this will run against hidden test cases");
+  const handleSubmit = async () => {
+    // Redirect to login if not logged in
+    if (!user) {
+      navigate("/login", { state: { from: `/problems/${slug}` } });
+      return;
+    }
+
+    setSubmitting(true);
+    setSubmitResult(null);
+    setRunResult(null);
+
+    try {
+      const res = await submitCode({ problemSlug: slug, language, code });
+      setSubmitResult(res.data.submission);
+      // Switch to submissions tab to show history
+      setActiveTab("Submissions");
+    } catch (err) {
+      setSubmitResult({
+        verdict: "Error",
+        errorMessage: err.response?.data?.message || "Submission failed",
+        testCasesPassed: 0,
+        totalTestCases: 0,
+        runtime: 0,
+        language,
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  if (loading) return <p className="placeholder">Loading problem...</p>;
+  if (loading) return <p className="placeholder" style={{ padding: 32 }}>Loading problem...</p>;
 
   if (error) {
     return (
-      <div className="problem-detail-error">
+      <div style={{ textAlign: "center", padding: 64 }}>
         <p className="error">{error}</p>
         <Link to="/problems">← Back to Problems</Link>
       </div>
@@ -86,18 +120,44 @@ const ProblemDetail = () => {
 
   return (
     <div className="problem-detail-page">
+      {/* ── LEFT PANEL ── */}
       <div className="problem-detail-left">
-        <ProblemStatement problem={problem} />
+        <div className="tabs">
+          {TABS.map((tab) => (
+            <button
+              key={tab}
+              className={`tab-btn ${activeTab === tab ? "active" : ""}`}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === "Description" && (
+          <ProblemStatement problem={problem} />
+        )}
+
+        {activeTab === "Submissions" && (
+          user ? (
+            <SubmissionHistory problemSlug={slug} />
+          ) : (
+            <div style={{ padding: 24 }}>
+              <p>Please <Link to="/login">login</Link> to view your submissions.</p>
+            </div>
+          )
+        )}
       </div>
 
+      {/* ── RIGHT PANEL ── */}
       <div className="problem-detail-right">
         <div className="compiler-header">
           <LanguageSelector language={language} onChange={handleLanguageChange} />
           <button onClick={handleRun} disabled={running} className="run-button">
             {running ? "Running..." : "Run ▶"}
           </button>
-          <button onClick={handleSubmit} className="submit-button">
-            Submit
+          <button onClick={handleSubmit} disabled={submitting} className="submit-button">
+            {submitting ? "Submitting..." : "Submit"}
           </button>
         </div>
 
@@ -105,19 +165,37 @@ const ProblemDetail = () => {
           <CodeEditor language={language} code={code} onChange={setCode} />
         </div>
 
-        <div className="input-section">
-          <label>Input (stdin)</label>
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            rows={4}
-          />
-        </div>
+        {/* Show verdict card after submit */}
+        {submitResult && (
+          <VerdictCard submission={submitResult} />
+        )}
 
-        <div className="output-section">
-          <label>Output</label>
-          <OutputPanel result={result} loading={running} />
-        </div>
+        {/* Show run output if no submit result */}
+        {!submitResult && (
+          <>
+            <div className="input-section">
+              <label>Input (stdin)</label>
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                rows={4}
+              />
+            </div>
+            <div className="output-section">
+              <label>Output</label>
+              <OutputPanel result={runResult} loading={running} />
+            </div>
+          </>
+        )}
+
+        {/* Login prompt below editor if not logged in */}
+        {!user && (
+          <div className="login-prompt">
+            <Link to="/login" state={{ from: `/problems/${slug}` }}>
+              Login to submit your solution
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -203,3 +203,101 @@ body {
   border-radius: 4px;
   cursor: pointer;
 }
+
+/* ── Tabs ── */
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid #444;
+  margin-bottom: 16px;
+}
+
+.tab-btn {
+  padding: 8px 20px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #aaa;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.tab-btn.active {
+  color: #5a9fd4;
+  border-bottom: 2px solid #5a9fd4;
+}
+
+/* ── Verdict Card ── */
+.verdict-card {
+  padding: 16px;
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+.verdict-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.verdict-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+.verdict-error {
+  background: #1e1e1e;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #ff6b6b;
+  white-space: pre-wrap;
+  margin-top: 8px;
+}
+
+/* ── Submission History ── */
+.submission-history {
+  padding: 16px;
+}
+
+.submission-history h4 {
+  margin-bottom: 12px;
+  color: #aaa;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.submission-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.submission-table th {
+  text-align: left;
+  padding: 8px 12px;
+  background: #2a2a2a;
+  color: #aaa;
+  font-weight: 500;
+}
+
+.submission-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #333;
+}
+
+/* ── Login prompt ── */
+.login-prompt {
+  text-align: center;
+  padding: 12px;
+  background: #2a2a2a;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.login-prompt a {
+  color: #5a9fd4;
+}
