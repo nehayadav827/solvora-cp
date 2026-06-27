@@ -29,6 +29,9 @@ const ProblemDetail = () => {
   const [code, setCode] = useState(DEFAULT_CODE.cpp);
   const [input, setInput] = useState("");
 
+// NEW STATE
+const [ioTab, setIoTab] = useState("input");
+
   const [runResult, setRunResult] = useState(null);
   const [running, setRunning] = useState(false);
 
@@ -61,22 +64,31 @@ const ProblemDetail = () => {
   };
 
   const handleRun = async () => {
-    setRunning(true);
-    setRunResult(null);
-    setSubmitResult(null);
-    try {
-      const res = await runCode({ language, code, input });
-      setRunResult(res.data);
-    } catch (err) {
-      setRunResult({
-        success: false,
-        verdict: "Error",
-        error: err.response?.data?.message || "Something went wrong",
-      });
-    } finally {
-      setRunning(false);
-    }
-  };
+  setRunning(true);
+  setRunResult(null);
+  setSubmitResult(null);
+
+  // Automatically switch to the Output tab
+  setIoTab("output");
+
+  try {
+    const res = await runCode({
+      language,
+      code,
+      input,
+    });
+
+    setRunResult(res.data);
+  } catch (err) {
+    setRunResult({
+      success: false,
+      verdict: "Error",
+      error: err.response?.data?.message || "Something went wrong",
+    });
+  } finally {
+    setRunning(false);
+  }
+};
 
   const handleSubmit = async () => {
     // Redirect to login if not logged in
@@ -173,21 +185,26 @@ const ProblemDetail = () => {
 
         {/* Show run output if no submit result */}
         {!submitResult && (
-          <>
-            <div className="input-section">
-              <label>Input (stdin)</label>
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                rows={4}
-              />
-            </div>
-            <div className="output-section">
-              <label>Output</label>
-              <OutputPanel result={runResult} loading={running} />
-            </div>
-          </>
-        )}
+  <div className="io-section">
+    <div className="io-tabs">
+      <button className={`io-tab ${ioTab === "input" ? "active" : ""}`}
+        onClick={() => setIoTab("input")}>Input</button>
+      <button className={`io-tab ${ioTab === "output" ? "active" : ""}`}
+        onClick={() => setIoTab("output")}>Output</button>
+    </div>
+    <div className="io-content">
+      {ioTab === "input" ? (
+        <textarea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Enter input here..."
+        />
+      ) : (
+        <OutputPanel result={runResult} loading={running} />
+      )}
+    </div>
+  </div>
+)}
 
         {/* Login prompt below editor if not logged in */}
         {!user && (

@@ -1,41 +1,41 @@
-const VERDICT_COLORS = {
-  Success: "#0F7B0F",
-  "Compile Error": "#9B1C1C",
-  "Runtime Error": "#9B1C1C",
-  "Time Limit Exceeded": "#C05600",
-  "Unsupported Language": "#9B1C1C",
-  Error: "#9B1C1C",
-};
-
 const OutputPanel = ({ result, loading }) => {
   if (loading) {
     return (
-      <div className="output-panel">
-        <p>Running code...</p>
+      <div style={{ padding: "12px 14px", color: "var(--text-muted)", fontSize: 13 }}>
+        Running code...
       </div>
     );
   }
 
   if (!result) {
     return (
-      <div className="output-panel">
-        <p className="placeholder">Output will appear here after you run your code</p>
+      <div style={{
+        padding: "12px 14px",
+        color: "var(--text-muted)",
+        fontSize: 13,
+        fontFamily: "var(--font-mono)"
+      }}>
+        Output will appear here after you run your code
       </div>
     );
   }
 
-  const verdictColor = VERDICT_COLORS[result.verdict] || "#888";
-
   return (
-    <div className="output-panel">
-      <div className="verdict" style={{ color: verdictColor }}>
-        {result.verdict}
-      </div>
-
+    <div style={{ padding: "12px 14px" }}>
       {result.success ? (
         <pre className="output-text">{result.output || "(no output)"}</pre>
       ) : (
-        <pre className="output-text error-text">{result.error}</pre>
+        <>
+          <div style={{
+            fontSize: 12,
+            fontWeight: 600,
+            color: "var(--red)",
+            marginBottom: 6
+          }}>
+            {result.verdict}
+          </div>
+          <pre className="output-text error-text">{result.error}</pre>
+        </>
       )}
     </div>
   );
