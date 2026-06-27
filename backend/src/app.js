@@ -8,6 +8,7 @@ import problemRoutes from "./routes/problemRoutes.js";
 import submissionRoutes from "./routes/submissionRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
+import contestRoutes from "./routes/contestRoutes.js";
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use("/api/problems", problemRoutes);
 app.use("/api/submissions", submissionRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/contests", contestRoutes);
 
 app.get("/", (req, res) => {
   res.json({
