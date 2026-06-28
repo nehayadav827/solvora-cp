@@ -7,10 +7,11 @@ import {
 } from "../utils/generateToken.js";
 
 const cookieOptions = {
-  httpOnly: true,
-  secure: false,
-  sameSite: "lax",
+  httpOnly: true,   // JS cannot read this cookie — XSS protection
+  secure: process.env.NODE_ENV === "production", // HTTPS only in prod
+  sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
   maxAge: 7 * 24 * 60 * 60 * 1000,
+  path: "/",        // cookie sent on all routes
 };
 
 //register controller
