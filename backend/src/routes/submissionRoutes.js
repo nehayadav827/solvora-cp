@@ -6,6 +6,7 @@ import {
   getSubmissionById,
 } from "../controllers/submissionController.js";
 import { protect } from "../middleware/authMiddleware.js";
+import { validateSubmission } from "../middleware/validateRequest.js";
 
 const submissionLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
@@ -26,5 +27,6 @@ const router = express.Router();
 router.post("/", protect, submissionLimiter, submitCode);
 router.get("/", protect, getMySubmissions);
 router.get("/:id", protect, getSubmissionById);
+router.post("/", protect, submissionLimiter, validateSubmission, submitCode);
 
 export default router;
